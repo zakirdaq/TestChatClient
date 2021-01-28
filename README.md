@@ -1,3 +1,3 @@
 # Test-Chat-Client-With-angular-10
 
-This is a test project to implement real time chat using angular with signal r.
+This is a test project to implement real time chat using Angular 10 with SignalR.
