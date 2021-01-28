@@ -1,0 +1,21 @@
+﻿<div class="ud-body">
+  <div class="container">
+    <h2>Hi {{user.UserName}}!</h2>
+    <p>Your chat board here!!</p>
+  </div>
+  <div class="msg-box">
+      <ul>
+        <li *ngFor="let mObj of msgInboxArray" [ngClass]="mObj.SenderId === user.Id ? 'in-msg' : 'ex-msg'">
+            <button class="delete-btn" (click)= "delete(mObj.Id)">Delete</button>
+            {{mObj.UserInfo}} ({{mObj.MessageTime}}): <span class="msg-italic-style">{{mObj.Message}}</span><br />
+        </li>
+      </ul>
+    </div>
+    <div class="ud-flex-row">
+      <input type="text" placeholder="Type message here" class="msg-input" [(ngModel)]="msgDto.Message"  />
+      <select class="msg-select" [(ngModel)]="msgDto.RecieverId">
+        <option *ngFor="let x of users" [value]="x.Id">{{x.UserName}}</option>
+      </select>
+      <button class="send-btn" (click)= "send()">Send<i class="fa fa-paper-plane"></i></button>
+    </div>
+</div>
