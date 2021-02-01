@@ -24,7 +24,7 @@ export class ChatService {
         this.connection.onclose(async () => {
             await this.start();
         });
-        this.connection.on("ReceiveOne", (id, senderId, recieverId, userinfo, messagetime, message) => { this.mapReceivedMessage(id, senderId, recieverId, userinfo, messagetime, message); });
+        this.connection.on("ReceiveMessage", (id, senderId, recieverId, userinfo, messagetime, message) => { this.mapReceivedMessage(id, senderId, recieverId, userinfo, messagetime, message); });
         this.start();                 
     }
 
