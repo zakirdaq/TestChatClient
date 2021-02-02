@@ -5,22 +5,25 @@ import { MessageModel } from '../../app/_models/message';
 import { Observable, Subject } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
+import { AccountService } from '@app/_services';
 
 @Injectable({
   providedIn: 'root'
 })
 
 export class ChatService {
+	
+	private user = this.accountService.userValue;
 
     private  connection: any = new signalR.HubConnectionBuilder()
-    .withUrl(`${environment.apiUrl}/chatsocket`)
+    .withUrl(`${environment.apiUrl}/chatsocket?groupName=` + this.user.Id)
     .configureLogging(signalR.LogLevel.Information)
     .build();
 
     private receivedMessageObject: MessageModel = new MessageModel();
     private sharedObj = new Subject<MessageModel>();
 
-    constructor(private http: HttpClient) { 
+    constructor(private http: HttpClient, private accountService: AccountService) { 
         this.connection.onclose(async () => {
             await this.start();
         });
