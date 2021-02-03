@@ -1,394 +1,53 @@
-﻿<div class="ud-body">
-  <div class="container">
-    <h2>Hi {{user.UserName}}!</h2>
-    <p>Your chat board here!!</p>
-  </div>
-  <div class="msg-box">
-      <ul>
-        <li *ngFor="let mObj of msgInboxArray" [ngClass]="mObj.SenderId === user.Id ? 'in-msg' : 'ex-msg'">
-            <button class="delete-btn" (click)= "delete(mObj.Id)">Delete</button>
-            {{mObj.UserInfo}} ({{mObj.MessageTime}}): <span class="msg-italic-style">{{mObj.Message}}</span><br />
-        </li>
-      </ul>
-    </div>
-    <div class="ud-flex-row">
-      <input type="text" placeholder="Type message here" class="msg-input" [(ngModel)]="msgDto.Message"  />
-      <select class="msg-select" [(ngModel)]="msgDto.RecieverId">
-        <option *ngFor="let x of users" [value]="x.Id">{{x.UserName}}</option>
-      </select>
-      <button class="send-btn" (click)= "send()">Send<i class="fa fa-paper-plane"></i></button>
-    </div>
-</div>
-
-<html lang="en">
-
+﻿<html lang="en">
 <body>
-
-  <div class="container app">
-    <div class="row app-one">
-
-      <div class="col-sm-4 side">
-        <div class="side-one">
-          <!-- Heading -->
-          <div class="row heading">
-            <div class="col-sm-3 col-xs-3 heading-avatar">
-              <div class="heading-avatar-icon">
-                <img src="http://shurl.esy.es/y">
-              </div>
-            </div>
-            <div class="col-sm-1 col-xs-1  heading-dot  pull-right">
-              <i class="fa fa-ellipsis-v fa-2x  pull-right" aria-hidden="true"></i>
-            </div>
-            <div class="col-sm-2 col-xs-2 heading-compose  pull-right">
-              <i class="fa fa-comments fa-2x  pull-right" aria-hidden="true"></i>
-            </div>
+  <div class="green-background"></div>
+  <div class="wrap">
+      <section class="left">
+          <div class="profile">
+              <img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/1089577/user.jpg">
+              <a style="margin: 15px;" class="nav-item nav-link" (click)="logout()">Logout</a>
           </div>
-          <!-- Heading End -->
-
-          <!-- SearchBox -->
-          <div class="row searchBox">
-            <div class="col-sm-12 searchBox-inner">
-              <div class="form-group has-feedback">
-                <input id="searchText" type="text" class="form-control" name="searchText" placeholder="Search">
-                <span class="glyphicon glyphicon-search form-control-feedback"></span>
+          <div class="wrap-search">
+              <div class="search">
+                  <input type="text" [(ngModel)]="searchBy" class="input-search" placeholder="Search">
+              </div>
+          </div>
+          <div class="contact-list">
+            <div *ngFor="let x of users | myfilter:searchBy" [ngClass]="x.Id === message.RecieverId ? 'contact active-contact' : 'contact'"  (click)="loadMessage(x.Id)">              
+              <img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/1089577/contact7.JPG" alt="profilpicture">
+              <div class="contact-preview">
+                <div class="contact-text">
+                  <h1 class="font-name">{{x.UserName}}</h1>
+                  <p class="font-preview">{{x.LastMessage}}</p>
+                </div>
+              </div>
+              <div class="contact-time">
+                <p>{{x.LastMessageTime}}</p>
               </div>
             </div>
           </div>
+      </section>
 
-          <!-- Search Box End -->
-          <!-- sideBar -->
-          <div class="row sideBar">
-            <div *ngFor="let x of users" class="row sideBar-body">
-              <div class="col-sm-3 col-xs-3 sideBar-avatar">
-                <div class="avatar-icon">
-                  <img src="http://shurl.esy.es/y">
-                </div>
-              </div>
-              <div class="col-sm-9 col-xs-9 sideBar-main">
-                <div class="row">
-                  <div class="col-sm-8 col-xs-8 sideBar-name">
-                    <span class="name-meta">{{x.UserName}}
-                  </span>
-                  </div>
-                  <div class="col-sm-4 col-xs-4 pull-right sideBar-time">
-                    <span class="time-meta pull-right">18:18
-                  </span>
-                  </div>
-                </div>
-              </div>
-            </div>
+      <section class="right">
+          <div class="chat-head">
+            <img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/1089577/contact7.JPG" alt="profilpicture">
           </div>
-          <!-- Sidebar End -->
-        </div>
-        <div class="side-two">
-
-          <!-- Heading -->
-          <div class="row newMessage-heading">
-            <div class="row newMessage-main">
-              <div class="col-sm-2 col-xs-2 newMessage-back">
-                <i class="fa fa-arrow-left" aria-hidden="true"></i>
-              </div>
-              <div class="col-sm-10 col-xs-10 newMessage-title">
-                New Chat
+          <div class="wrap-chat">
+            <div class="chat">
+              <div class="chat-bubble" *ngFor="let m of currentMessages" [ngClass]="m.SenderId === user.Id ? 'me' : 'you'">
+                <div [ngClass]="m.SenderId === user.Id ? 'my-mouth' : 'your-mouth'"></div>
+                <div class="content">{{m.Message}} <a class="delete-btn" (click)= "delete(m.Id)">X</a></div>
+                <div class="time">{{m.MessageTime}}</div>
               </div>
             </div>
+            <div class="information"></div>
           </div>
-          <!-- Heading End -->
-
-          <!-- ComposeBox -->
-          <div class="row composeBox">
-            <div class="col-sm-12 composeBox-inner">
-              <div class="form-group has-feedback">
-                <input id="composeText" type="text" class="form-control" name="searchText" placeholder="Search People">
-                <span class="glyphicon glyphicon-search form-control-feedback"></span>
+          <div class="wrap-message">
+              <div class="message">
+                  <input type="text" class="input-message" (keyup.enter)="send()" [(ngModel)]="message.Message" *ngIf="message.RecieverId !==''" placeholder="Type a message">
               </div>
-            </div>
           </div>
-          <!-- ComposeBox End -->
-
-          <!-- sideBar -->
-          <div class="row compose-sideBar">
-            <div class="row sideBar-body">
-              <div class="col-sm-3 col-xs-3 sideBar-avatar">
-                <div class="avatar-icon">
-                  <img src="http://shurl.esy.es/y">
-                </div>
-              </div>
-              <div class="col-sm-9 col-xs-9 sideBar-main">
-                <div class="row">
-                  <div class="col-sm-8 col-xs-8 sideBar-name">
-                    <span class="name-meta">Ankit Jain
-                  </span>
-                  </div>
-                  <div class="col-sm-4 col-xs-4 pull-right sideBar-time">
-                    <span class="time-meta pull-right">18:18
-                  </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="row sideBar-body">
-              <div class="col-sm-3 col-xs-3 sideBar-avatar">
-                <div class="avatar-icon">
-                  <img src="http://shurl.esy.es/y">
-                </div>
-              </div>
-              <div class="col-sm-9 col-xs-9 sideBar-main">
-                <div class="row">
-                  <div class="col-sm-8 col-xs-8 sideBar-name">
-                    <span class="name-meta">Ankit Jain
-                  </span>
-                  </div>
-                  <div class="col-sm-4 col-xs-4 pull-right sideBar-time">
-                    <span class="time-meta pull-right">18:18
-                  </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="row sideBar-body">
-              <div class="col-sm-3 col-xs-3 sideBar-avatar">
-                <div class="avatar-icon">
-                  <img src="http://shurl.esy.es/y">
-                </div>
-              </div>
-              <div class="col-sm-9 col-xs-9 sideBar-main">
-                <div class="row">
-                  <div class="col-sm-8 col-xs-8 sideBar-name">
-                    <span class="name-meta">Ankit Jain
-                  </span>
-                  </div>
-                  <div class="col-sm-4 col-xs-4 pull-right sideBar-time">
-                    <span class="time-meta pull-right">18:18
-                  </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="row sideBar-body">
-              <div class="col-sm-3 col-xs-3 sideBar-avatar">
-                <div class="avatar-icon">
-                  <img src="http://shurl.esy.es/y">
-                </div>
-              </div>
-              <div class="col-sm-9 col-xs-9 sideBar-main">
-                <div class="row">
-                  <div class="col-sm-8 col-xs-8 sideBar-name">
-                    <span class="name-meta">Ankit Jain
-                  </span>
-                  </div>
-                  <div class="col-sm-4 col-xs-4 pull-right sideBar-time">
-                    <span class="time-meta pull-right">18:18
-                  </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="row sideBar-body">
-              <div class="col-sm-3 col-xs-3 sideBar-avatar">
-                <div class="avatar-icon">
-                  <img src="http://shurl.esy.es/y">
-                </div>
-              </div>
-              <div class="col-sm-9 col-xs-9 sideBar-main">
-                <div class="row">
-                  <div class="col-sm-8 col-xs-8 sideBar-name">
-                    <span class="name-meta">Ankit Jain
-                  </span>
-                  </div>
-                  <div class="col-sm-4 col-xs-4 pull-right sideBar-time">
-                    <span class="time-meta pull-right">18:18
-                  </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="row sideBar-body">
-              <div class="col-sm-3 col-xs-3 sideBar-avatar">
-                <div class="avatar-icon">
-                  <img src="http://shurl.esy.es/y">
-                </div>
-              </div>
-              <div class="col-sm-9 col-xs-9 sideBar-main">
-                <div class="row">
-                  <div class="col-sm-8 col-xs-8 sideBar-name">
-                    <span class="name-meta">Ankit Jain
-                  </span>
-                  </div>
-                  <div class="col-sm-4 col-xs-4 pull-right sideBar-time">
-                    <span class="time-meta pull-right">18:18
-                  </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="row sideBar-body">
-              <div class="col-sm-3 col-xs-3 sideBar-avatar">
-                <div class="avatar-icon">
-                  <img src="http://shurl.esy.es/y">
-                </div>
-              </div>
-              <div class="col-sm-9 col-xs-9 sideBar-main">
-                <div class="row">
-                  <div class="col-sm-8 col-xs-8 sideBar-name">
-                    <span class="name-meta">Ankit Jain
-                  </span>
-                  </div>
-                  <div class="col-sm-4 col-xs-4 pull-right sideBar-time">
-                    <span class="time-meta pull-right">18:18
-                  </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="row sideBar-body">
-              <div class="col-sm-3 col-xs-3 sideBar-avatar">
-                <div class="avatar-icon">
-                  <img src="http://shurl.esy.es/y">
-                </div>
-              </div>
-              <div class="col-sm-9 col-xs-9 sideBar-main">
-                <div class="row">
-                  <div class="col-sm-8 col-xs-8 sideBar-name">
-                    <span class="name-meta">Ankit Jain
-                  </span>
-                  </div>
-                  <div class="col-sm-4 col-xs-4 pull-right sideBar-time">
-                    <span class="time-meta pull-right">18:18
-                  </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="row sideBar-body">
-              <div class="col-sm-3 col-xs-3 sideBar-avatar">
-                <div class="avatar-icon">
-                  <img src="http://shurl.esy.es/y">
-                </div>
-              </div>
-              <div class="col-sm-9 col-xs-9 sideBar-main">
-                <div class="row">
-                  <div class="col-sm-8 col-xs-8 sideBar-name">
-                    <span class="name-meta">Ankit Jain
-                  </span>
-                  </div>
-                  <div class="col-sm-4 col-xs-4 pull-right sideBar-time">
-                    <span class="time-meta pull-right">18:18
-                  </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="row sideBar-body">
-              <div class="col-sm-3 col-xs-3 sideBar-avatar">
-                <div class="avatar-icon">
-                  <img src="http://shurl.esy.es/y">
-                </div>
-              </div>
-              <div class="col-sm-9 col-xs-9 sideBar-main">
-                <div class="row">
-                  <div class="col-sm-8 col-xs-8 sideBar-name">
-                    <span class="name-meta">Ankit Jain
-                  </span>
-                  </div>
-                  <div class="col-sm-4 col-xs-4 pull-right sideBar-time">
-                    <span class="time-meta pull-right">18:18
-                  </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- Sidebar End -->
-      </div>
-
-
-      <!-- New Message Sidebar End -->
-
-      <!-- Conversation Start -->
-      <div class="col-sm-8 conversation">
-        <!-- Heading -->
-        <div class="row heading">
-          <div class="col-sm-2 col-md-1 col-xs-3 heading-avatar">
-            <div class="heading-avatar-icon">
-              <img src="http://shurl.esy.es/y">
-            </div>
-          </div>
-          <div class="col-sm-8 col-xs-7 heading-name">
-            <a class="heading-name-meta">Ankit Jain
-            </a>
-            <span class="heading-online">Online</span>
-          </div>
-          <div class="col-sm-1 col-xs-1  heading-dot pull-right">
-            <i class="fa fa-ellipsis-v fa-2x  pull-right" aria-hidden="true"></i>
-          </div>
-        </div>
-        <!-- Heading End -->
-
-        <!-- Message Box -->
-        <div class="row message" id="conversation">
-
-          <div class="row message-previous">
-            <div class="col-sm-12 previous">
-              <a onclick="previous(this)" id="ankitjain28" name="20">
-              Show Previous Message!
-              </a>
-            </div>
-          </div>
-
-          <div class="row message-body">
-            <div class="col-sm-12 message-main-receiver">
-              <div class="receiver">
-                <div class="message-text">
-                 Hyy, Its Awesome..!
-                </div>
-                <span class="message-time pull-right">
-                  Sun
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div class="row message-body">
-            <div class="col-sm-12 message-main-sender">
-              <div class="sender">
-                <div class="message-text">
-                  Thanks n I know its awesome...!
-                </div>
-                <span class="message-time pull-right">
-                  Sun
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- Message Box End -->
-
-        <!-- Reply Box -->
-        <div class="row reply">
-          <div class="col-sm-1 col-xs-1 reply-emojis">
-            <i class="fa fa-smile-o fa-2x"></i>
-          </div>
-          <div class="col-sm-9 col-xs-9 reply-main">
-            <textarea class="form-control" rows="1" id="comment"></textarea>
-          </div>
-          <div class="col-sm-1 col-xs-1 reply-recording">
-            <i class="fa fa-microphone fa-2x" aria-hidden="true"></i>
-          </div>
-          <div class="col-sm-1 col-xs-1 reply-send">
-            <i class="fa fa-send fa-2x" aria-hidden="true"></i>
-          </div>
-        </div>
-        <!-- Reply Box End -->
-      </div>
-      <!-- Conversation End -->
-    </div>
-    <!-- App One End -->
+      </section>
   </div>
-
-  <!-- App End -->
 </body>
-
 </html>

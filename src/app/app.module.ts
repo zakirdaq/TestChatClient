@@ -10,6 +10,8 @@ import { AppComponent } from './app.component';
 import { AlertComponent } from './_components';
 import { HomeComponent } from './home';
 
+import { MyFilterPipe } from './_pipes/my-filter.pipe';
+
 @NgModule({
     imports: [
         FormsModule,
@@ -19,6 +21,7 @@ import { HomeComponent } from './home';
         AppRoutingModule
     ],
     declarations: [
+        MyFilterPipe,
         AppComponent,
         AlertComponent,
         HomeComponent

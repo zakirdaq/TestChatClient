@@ -54,9 +54,9 @@ export class ChatService {
     }
 
     // Calls the controller method
-    public broadcastMessage(msgDto: any) {
-        this.http.post(`${environment.apiUrl}/api/UserChat/Create`, msgDto)
-        .subscribe(data => console.log(data));
+    public broadcastMessage(message: any) {
+        this.http.post(`${environment.apiUrl}/api/UserChat/Create`, message)
+        .subscribe();
     }
 
     public retrieveMappedObject(): Observable<MessageModel> {

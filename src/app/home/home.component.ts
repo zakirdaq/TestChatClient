@@ -11,8 +11,9 @@ export class HomeComponent {
 
     user: User;
     users: User[];
-    msgDto: MessageModel = new MessageModel();
-    msgInboxArray: MessageModel[] = [];
+    message: MessageModel = new MessageModel();
+    currentMessages: MessageModel[] = [];
+    searchBy: string = '';
 
     constructor(private accountService: AccountService, private chatService: ChatService) {
         this.user = this.accountService.userValue;
@@ -22,22 +23,44 @@ export class HomeComponent {
         this.accountService.getAll()
         .subscribe(users => this.users = users);
 
-        this.chatService.getByUserId(this.user.Id)
-        .subscribe(chats => this.msgInboxArray = chats);
-
         this.chatService.retrieveMappedObject()
         .subscribe( (receivedObj: MessageModel) => { this.addToInbox(receivedObj);}); 
     }
 
+    logout() {
+        this.accountService.logout();
+    }
+
+    loadMessage(userId): void {
+        this.message.RecieverId = userId;
+        this.users.forEach((user, n) => {
+            if (this.users[n].Id === userId) {
+                if(!this.users[n].IsMessageLoaded){
+                    this.chatService.getByUserId(userId)
+                    .subscribe(chats => {
+                        this.users[n].UserMessages = this.currentMessages = chats;
+                        this.users[n].IsMessageLoaded = true;
+                        if(this.users[n].UserMessages.length > 0){
+                            this.users[n].LastMessageTime = this.users[n].UserMessages[this.users[n].UserMessages.length - 1].MessageTime;
+                            this.users[n].LastMessage = this.users[n].UserMessages[this.users[n].UserMessages.length - 1].Message;
+                        }
+                    });                        
+                }
+                else
+                    this.currentMessages = this.users[n].UserMessages;
+            }
+        })
+    }
+
     send(): void {
-        if(this.msgDto) {
-            if(this.msgDto.RecieverId.length == 0 || this.msgDto.Message.length == 0){
-                window.alert("Both fields are required.");
+        if(this.message) {
+            if(this.message.RecieverId.length == 0 || this.message.Message.length == 0){
+                window.alert("Please select an user and write a message.");
                 return;
             } 
             else {
-                this.chatService.broadcastMessage(this.msgDto);
-                this.msgDto.Message = '';
+                this.chatService.broadcastMessage(this.message);
+                this.message.Message = '';
             }
         }
     }
@@ -45,8 +68,8 @@ export class HomeComponent {
     delete(id:string): void {
         this.chatService.delete(id);
 
-        this.msgInboxArray.forEach( (item, index) => {
-            if(item.Id === id) this.msgInboxArray.splice(index,1);
+        this.currentMessages.forEach( (item, index) => {
+            if(item.Id === id) this.currentMessages.splice(index,1);
         });
     }
 
@@ -58,6 +81,12 @@ export class HomeComponent {
         newObj.RecieverId = obj.RecieverId;
         newObj.MessageTime = obj.MessageTime;
         newObj.Message = obj.Message;
-        this.msgInboxArray.push(newObj);
+        this.currentMessages.push(newObj);
+        this.users.forEach((user, n) => {
+            if (this.users[n].Id === obj.RecieverId || this.users[n].Id === obj.SenderId) {
+                this.users[n].LastMessageTime = obj.MessageTime;
+                this.users[n].LastMessage = obj.Message;
+            }
+        })
     }    
 }
